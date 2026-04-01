@@ -1,0 +1,61 @@
+server:
+  port: ${PORT:8080}
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: adhi-platform
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/ADHI}
+    username: postgres
+    password: admin123
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
+
+# ADHI Custom Config
+adhi:
+  jwt:
+    private-key-path: classpath:keys/private.pem
+    public-key-path: classpath:keys/public.pem
+    access-token-expiry-ms: 900000       # 15 minutes
+    refresh-token-expiry-ms: 604800000   # 7 days
+    issuer: adhi-platform
+
+  file-storage:
+    upload-dir: ./uploads
+    houses-dir: ./uploads/houses
+    base-url: http://localhost:8080/api/files
+
+  odoo:
+    base-url: https://your-odoo-instance.odoo.com
+    api-key: ${ODOO_API_KEY:odoo-dev-key-placeholder}
+    database: adhi_production
+    webhook-secret: ${ODOO_WEBHOOK_SECRET:adhi-webhook-secret-2026}
+    endpoints:
+      purchase-order: /api/v1/purchase.order
+      stock-update: /api/v1/stock.warehouse
+      delivery-status: /api/v1/delivery.order
+
+  cors:
+    allowed-origins: ${FRONTEND_URL:http://localhost:5173},http://localhost:3000,http://localhost:5173
+
+springdoc:
+  api-docs:
+    path: /docs
+  swagger-ui:
+    path: /swagger-ui.html

@@ -1,0 +1,67 @@
+{
+  "_comment": "ADHI PLATFORM to ODOO INTEGRATION CONTRACT",
+  "_context": "The ADHI platform (PostgreSQL) is the source of truth for the house blueprint, rules engine, and BOQ logic. When an order is confirmed, ADHI sends this precisely computed JSON to Odoo.",
+  "endpoints": {
+    "1_ADHI_TO_ODOO_CREATE_ORDER": {
+      "method": "POST",
+      "endpoint_expected_from_odoo": "https://odoo.partner-instance.com/api/v1/mrp.production/create",
+      "description": "ADHI sends this payload to Odoo after an Accountant confirms a Franchisee payment. Odoo uses this to dispatch the physical components.",
+      "payload_we_send_to_odoo": {
+        "procurement_id": "PROC-ORD-2026-0042",
+        "boq_id": "BOQ-PREVIEW-1774943992",
+        "order_id": "ORD-2026-0042",
+        "generated_at": "2026-03-31T10:15:00Z",
+        "region": "RW",
+        "currency": "RWF",
+        "franchisee_id": "USR-789",
+        "delivery_region": "Rwanda",
+        "groups": [
+          {
+            "category": "Structural",
+            "supplierTag": "structural_supplier",
+            "items": [
+              {
+                "comp_id": "COMP-002",
+                "odoo_sku": "STL-WALL-600",
+                "description": "Steel Wall Panels",
+                "qty": 24,
+                "unit": "panel",
+                "unit_cost": 85000,
+                "total_cost": 2040000,
+                "qty_locked": true,
+                "sku_locked": true,
+                "cost_locked": false
+              },
+              {
+                "comp_id": "COMP-003",
+                "odoo_sku": "RF-BEAM-STL",
+                "description": "Roof Structure",
+                "qty": 6,
+                "unit": "piece",
+                "unit_cost": 120000,
+                "total_cost": 720000,
+                "qty_locked": true,
+                "sku_locked": true,
+                "cost_locked": false
+              }
+            ]
+          }
+        ]
+      }
+    },
+    "2_ODOO_TO_ADHI_SHIPMENT_STATUS": {
+      "method": "POST",
+      "endpoint_provided_by_adhi": "https://api.adhi.rw/api/v1/webhooks/odoo/shipment-status",
+      "description": "Odoo sends this payload BACK to ADHI's PostgreSQL backend when the warehouse ships the items. ADHI uses this to update the Franchisee's dashboard.",
+      "payload_odoo_must_send_us": {
+        "order_id": "ORD-2026-0042",
+        "procurement_id": "PROC-ORD-2026-0042",
+        "timestamp": "2026-04-02T14:30:00Z",
+        "status": "SHIPPED",
+        "tracking_reference": "RW-TRK-9901A",
+        "courier": "Kigali Logistics Hub",
+        "notes": "Container 1 of 2 dispatched."
+      }
+    }
+  }
+}
