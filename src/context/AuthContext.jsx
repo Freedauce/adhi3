@@ -6,7 +6,19 @@ const AuthContext = createContext();
 export function AuthProvider({ children }) {
     const [user, setUser] = useState(() => {
         const stored = localStorage.getItem("adhi_user");
-        return stored ? JSON.parse(stored) : null;
+        if (stored) return JSON.parse(stored);
+        
+        // Bypass: Default to Admin for immediate access
+        const defaultAdmin = {
+            id: "USR-ROOT",
+            email: "admin@adhi.com",
+            fullName: "Adhi Admin (Auto-Login)",
+            role: "ADMIN",
+            regionCode: "RW",
+            status: "ACTIVE",
+        };
+        localStorage.setItem("adhi_user", JSON.stringify(defaultAdmin));
+        return defaultAdmin;
     });
 
     const getUsersDB = () => {

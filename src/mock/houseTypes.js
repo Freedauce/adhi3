@@ -67,19 +67,19 @@ export const houseTypes = [
 ];
 
 // Master component registry
+// Master component library — Synced with v1.2 specifications
 export const components = [
-  { id: "COMP-001", name: "Foundation System", category: "Structural", type: "Fixed", unit: "set", description: "Reinforced concrete strip foundation with damp-proof membrane" },
-  { id: "COMP-002", name: "Wall Panels", category: "Structural", type: "Variable", unit: "panel", description: "Light steel frame + insulated concrete wall panels (600mm width)" },
-  { id: "COMP-003", name: "Roof Structure", category: "Structural", type: "Variable", unit: "piece", description: "Steel ridge beams and rafters with waterproof membrane" },
-  { id: "COMP-004", name: "Internal Partitions", category: "Interior", type: "Variable", unit: "panel", description: "Lightweight plasterboard partition panels" },
-  { id: "COMP-005", name: "Doors", category: "Interior", type: "Variable", unit: "unit", description: "Pre-hung composite doors with frames" },
-  { id: "COMP-006", name: "Windows", category: "Envelope", type: "Variable", unit: "unit", description: "Aluminium-frame glazed window units" },
-  { id: "COMP-007", name: "Electrical System", category: "MEP", type: "Fixed", unit: "set", description: "Complete wiring loom, distribution board, sockets, and switches" },
-  { id: "COMP-008", name: "Plumbing System", category: "MEP", type: "Variable", unit: "fixture", description: "WC, basin, and shower plumbing fixtures with piping" },
-  { id: "COMP-009", name: "Roofing Sheets", category: "Envelope", type: "Variable", unit: "sheet", description: "Galvanized corrugated steel roofing sheets" },
-  { id: "COMP-010", name: "Interior Finishes", category: "Finishes", type: "Variable", unit: "m2", description: "Floor tiles, wall paint, ceiling finish" },
-  { id: "COMP-011", name: "Joinery", category: "Finishes", type: "Variable", unit: "set", description: "Kitchen cabinets, countertop, and built-in storage" },
+  { id: "COMP-001", name: "Foundation System", category: "Structural", type: "Fixed", unit: "Lot", description: "Strip foundation + slab with damp-proof membrane" },
+  { id: "COMP-002", name: "Structural Wall", category: "Structural", type: "Variable", unit: "m2", description: "Light Concrete Block Wall (200mm) + mortar" },
+  { id: "COMP-003", name: "Roof", category: "Structural", type: "Variable", unit: "m2", description: "Standard Roof System (Steel rafters + OSB + membrane)" },
+  { id: "COMP-004", name: "Doors & Windows", category: "Openings", type: "Variable", unit: "Lot", description: "Openings Package: Pre-hung composite doors & ALU windows" },
+  { id: "COMP-005", name: "Internal Partitions", category: "Interior", type: "Variable", unit: "panel", description: "Lightweight plasterboard partition panels" },
+  { id: "COMP-006", name: "Electrical System", category: "MEP", type: "Fixed", unit: "set", description: "Complete wiring loom, distribution board, sockets" },
+  { id: "COMP-007", name: "Plumbing System", category: "MEP", type: "Variable", unit: "fixture", description: "WC, basin, and shower plumbing fixtures" },
+  { id: "COMP-008", name: "Interior Finishes", category: "Finishes", type: "Variable", unit: "m2", description: "Floor tiles, wall paint, ceiling finish" },
+  { id: "COMP-009", name: "Joinery", category: "Finishes", type: "Variable", unit: "set", description: "Kitchen cabinets, countertop, and built-in storage" },
 ];
+
 
 // Regions
 export const regions = [

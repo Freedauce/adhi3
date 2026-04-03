@@ -23,11 +23,12 @@ const categoryColors = {
   Interior:   { bg: "bg-amber-100 text-amber-700", icon: "🚪", ring: "ring-amber-200" },
   MEP:        { bg: "bg-purple-100 text-purple-700", icon: "⚡", ring: "ring-purple-200" },
   Finishes:   { bg: "bg-green-100 text-green-700", icon: "🎨", ring: "ring-green-200" },
+  Openings:   { bg: "bg-rose-100 text-rose-700", icon: "🚪", ring: "ring-rose-200" },
 };
 
-const CATEGORIES = ["Structural", "Envelope", "Interior", "MEP", "Finishes"];
+const CATEGORIES = ["Structural", "Envelope", "Interior", "MEP", "Finishes", "Openings"];
 const TYPES = ["Fixed", "Variable"];
-const UNITS = ["set", "panel", "piece", "unit", "fixture", "sheet", "m2", "kg", "roll"];
+const UNITS = ["set", "panel", "piece", "unit", "fixture", "sheet", "m2", "kg", "roll", "Lot"];
 
 /* ── Blank form ── */
 const blankForm = {

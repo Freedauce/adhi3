@@ -60,7 +60,7 @@ function App() {
       <AuthProvider>
         <Routes>
           {/* ═══ Public Routes (no layout) ═══ */}
-          <Route path="/" element={<LandingPage />} />
+          <Route path="/" element={<Navigate to="/admin/overview" replace />} />
           <Route path="/apply/franchise" element={<FranchiseApplication />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/register" element={<RegisterPage />} />
