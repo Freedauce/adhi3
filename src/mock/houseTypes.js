@@ -69,15 +69,26 @@ export const houseTypes = [
 // Master component registry
 // Master component library — Synced with v1.2 specifications
 export const components = [
-  { id: "COMP-001", name: "Foundation System", category: "Structural", type: "Fixed", unit: "Lot", description: "Strip foundation + slab with damp-proof membrane" },
-  { id: "COMP-002", name: "Structural Wall", category: "Structural", type: "Variable", unit: "m2", description: "Light Concrete Block Wall (200mm) + mortar" },
-  { id: "COMP-003", name: "Roof", category: "Structural", type: "Variable", unit: "m2", description: "Standard Roof System (Steel rafters + OSB + membrane)" },
-  { id: "COMP-004", name: "Doors & Windows", category: "Openings", type: "Variable", unit: "Lot", description: "Openings Package: Pre-hung composite doors & ALU windows" },
-  { id: "COMP-005", name: "Internal Partitions", category: "Interior", type: "Variable", unit: "panel", description: "Lightweight plasterboard partition panels" },
-  { id: "COMP-006", name: "Electrical System", category: "MEP", type: "Fixed", unit: "set", description: "Complete wiring loom, distribution board, sockets" },
-  { id: "COMP-007", name: "Plumbing System", category: "MEP", type: "Variable", unit: "fixture", description: "WC, basin, and shower plumbing fixtures" },
-  { id: "COMP-008", name: "Interior Finishes", category: "Finishes", type: "Variable", unit: "m2", description: "Floor tiles, wall paint, ceiling finish" },
-  { id: "COMP-009", name: "Joinery", category: "Finishes", type: "Variable", unit: "set", description: "Kitchen cabinets, countertop, and built-in storage" },
+  { id: "FND-SET-001", name: "Setting out", category: "Foundation", type: "Fixed", unit: "item", description: "Setting out" },
+  { id: "FND-EXC-001", name: "Excavation for strip footing", category: "Foundation", type: "Variable", unit: "m3", description: "Excavation for strip footing" },
+  { id: "FND-HCF-001", name: "Hardcore fill 200 mm", category: "Foundation", type: "Variable", unit: "m3", description: "Hardcore fill 200 mm" },
+  { id: "FND-SND-001", name: "Sand blinding 50 mm", category: "Foundation", type: "Variable", unit: "m3", description: "Sand blinding 50 mm" },
+  { id: "FND-BLN-001", name: "Concrete blinding 40 mm", category: "Foundation", type: "Variable", unit: "m3", description: "Concrete blinding 40 mm" },
+  { id: "FND-STR-001", name: "Strip footing concrete", category: "Foundation", type: "Variable", unit: "m3", description: "Strip footing concrete" },
+  { id: "FND-DPM-001", name: "Damp proof membrane", category: "Foundation", type: "Variable", unit: "m2", description: "Damp proof membrane" },
+  { id: "FND-SLB-001", name: "Reinforced slab concrete 100 mm", category: "Foundation", type: "Variable", unit: "m3", description: "Reinforced slab concrete 100 mm" },
+  { id: "FND-MSH-001", name: "Slab reinforcement mesh", category: "Foundation", type: "Variable", unit: "m2", description: "Slab reinforcement mesh" },
+  { id: "WAL-EXT-001", name: "External wall system", category: "Walls", type: "Variable", unit: "m2", description: "External wall system" },
+  { id: "STR-RBM-001", name: "Ring beam", category: "Structure", type: "Variable", unit: "m", description: "Ring beam" },
+  { id: "ROF-FRM-001", name: "Roof structure", category: "Roof", type: "Variable", unit: "m2", description: "Roof structure" },
+  { id: "ROF-COV-001", name: "Roof covering", category: "Roof", type: "Variable", unit: "m2", description: "Roof covering" },
+  { id: "ROF-RDG-001", name: "Ridge cap", category: "Roof", type: "Variable", unit: "m", description: "Ridge cap" },
+  { id: "ROF-FAS-001", name: "Fascia board", category: "Roof", type: "Variable", unit: "m", description: "Fascia board" },
+  { id: "ROF-GTR-001", name: "Gutters", category: "Roof", type: "Variable", unit: "m", description: "Gutters" },
+  { id: "ROF-DWP-001", name: "Downpipes", category: "Roof", type: "Variable", unit: "nr", description: "Downpipes" },
+  { id: "OPN-DRF-001", name: "External door frame provision", category: "Openings", type: "Variable", unit: "nr", description: "External door frame provision" },
+  { id: "OPN-WOP-001", name: "Window opening provisions", category: "Openings", type: "Variable", unit: "nr", description: "Window opening provisions" },
+  { id: "OPN-LNT-001", name: "Lintels to openings", category: "Openings", type: "Variable", unit: "m", description: "Lintels to openings" }
 ];
 
 

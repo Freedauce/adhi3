@@ -9,11 +9,27 @@ import {
 } from "lucide-react";
 import { houseTypes, components } from "../../mock/houseTypes";
 
-/* ── Default Rules — Functional ── */
 const initialRules = [
-  { id: "RULE-CS1", layer: "BASE", trigger: "always", formula: "1", output: "COMP-001", status: "PUBLISHED", version: 1 },
-  { id: "RULE-CS2", layer: "BASE", trigger: "floor_area", formula: "Math.ceil((Math.sqrt(floorArea) * 4) / 0.6)", output: "COMP-002", status: "PUBLISHED", version: 1 },
-  { id: "RULE-CS3", layer: "BASE", trigger: "floor_area", formula: "Math.ceil(floorArea / 10)", output: "COMP-003", status: "PUBLISHED", version: 1 },
+  { id: "R-01", layer: "BASE", trigger: "always", formula: "1", output: "FND-SET-001", status: "PUBLISHED", version: 1 },
+  { id: "R-02", layer: "BASE", trigger: "floor_area", formula: "+(floorArea * 0.2).toFixed(2)", output: "FND-EXC-001", status: "PUBLISHED", version: 1 },
+  { id: "R-03", layer: "BASE", trigger: "floor_area", formula: "+(floorArea * 0.208).toFixed(2)", output: "FND-HCF-001", status: "PUBLISHED", version: 1 },
+  { id: "R-04", layer: "BASE", trigger: "floor_area", formula: "+(floorArea * 0.052).toFixed(2)", output: "FND-SND-001", status: "PUBLISHED", version: 1 },
+  { id: "R-05", layer: "BASE", trigger: "floor_area", formula: "+(floorArea * 0.0416).toFixed(2)", output: "FND-BLN-001", status: "PUBLISHED", version: 1 },
+  { id: "R-06", layer: "BASE", trigger: "floor_area", formula: "+(floorArea * 0.1).toFixed(2)", output: "FND-STR-001", status: "PUBLISHED", version: 1 },
+  { id: "R-07", layer: "BASE", trigger: "floor_area", formula: "+(floorArea * 1.04).toFixed(2)", output: "FND-DPM-001", status: "PUBLISHED", version: 1 },
+  { id: "R-08", layer: "BASE", trigger: "floor_area", formula: "+(floorArea * 0.104).toFixed(2)", output: "FND-SLB-001", status: "PUBLISHED", version: 1 },
+  { id: "R-09", layer: "BASE", trigger: "floor_area", formula: "+(floorArea * 1.04).toFixed(2)", output: "FND-MSH-001", status: "PUBLISHED", version: 1 },
+  { id: "R-10", layer: "BASE", trigger: "floor_area", formula: "+(floorArea * 1.6667).toFixed(1)", output: "WAL-EXT-001", status: "PUBLISHED", version: 1 },
+  { id: "R-11", layer: "BASE", trigger: "floor_area", formula: "+(floorArea * 0.6667).toFixed(1)", output: "STR-RBM-001", status: "PUBLISHED", version: 1 },
+  { id: "R-12", layer: "BASE", trigger: "floor_area", formula: "+(floorArea * 1.2).toFixed(2)", output: "ROF-FRM-001", status: "PUBLISHED", version: 1 },
+  { id: "R-13", layer: "BASE", trigger: "floor_area", formula: "+(floorArea * 1.2).toFixed(2)", output: "ROF-COV-001", status: "PUBLISHED", version: 1 },
+  { id: "R-14", layer: "BASE", trigger: "floor_area", formula: "+(floorArea * 0.1733).toFixed(1)", output: "ROF-RDG-001", status: "PUBLISHED", version: 1 },
+  { id: "R-15", layer: "BASE", trigger: "floor_area", formula: "+(floorArea * 0.6667).toFixed(1)", output: "ROF-FAS-001", status: "PUBLISHED", version: 1 },
+  { id: "R-16", layer: "BASE", trigger: "floor_area", formula: "+(floorArea * 0.48).toFixed(2)", output: "ROF-GTR-001", status: "PUBLISHED", version: 1 },
+  { id: "R-17", layer: "BASE", trigger: "floor_area", formula: "Math.ceil(floorArea / 18.75)", output: "ROF-DWP-001", status: "PUBLISHED", version: 1 },
+  { id: "R-18", layer: "BASE", trigger: "bedrooms", formula: "1 + Math.floor(bedrooms / 3)", output: "OPN-DRF-001", status: "PUBLISHED", version: 1 },
+  { id: "R-19", layer: "BASE", trigger: "bedrooms", formula: "2 + bedrooms", output: "OPN-WOP-001", status: "PUBLISHED", version: 1 },
+  { id: "R-20", layer: "BASE", trigger: "bedrooms", formula: "(2 + bedrooms) * 2", output: "OPN-LNT-001", status: "PUBLISHED", version: 1 }
 ];
 
 const layerColors = { 
@@ -31,7 +47,7 @@ export default function RulesEngine() {
 
   // Simulator State
   const [simConfig, setSimConfig] = useState({
-    bedrooms: 0,
+    bedrooms: 2,
   });
 
   /* ── Formula Execution Hub ── */
@@ -39,7 +55,7 @@ export default function RulesEngine() {
     const results = {};
     const conflictList = [];
     const context = {
-      floorArea: 37.5 + (Number(simConfig.bedrooms) * 15),
+      floorArea: Math.max(15, 37.5 + ((Number(simConfig.bedrooms) - 2) * 12.5)),
       bedrooms: Number(simConfig.bedrooms),
     };
 
@@ -94,13 +110,17 @@ export default function RulesEngine() {
 
   const addNewRule = () => {
     const newId = `RULE-${String(rules.length + 1).padStart(3, "0")}`;
-    const newRule = { id: newId, layer: "BASE", trigger: "always", formula: "0", output: "COMP-001", status: "DRAFT", version: 1 };
+    const newRule = { id: newId, layer: "BASE", trigger: "always", formula: "0", output: components[0]?.id || "COMP-001", status: "DRAFT", version: 1 };
     setRules([...rules, newRule]);
     startEdit(newRule);
   };
 
+  const deleteRule = (idToDelete) => {
+    setRules(prev => prev.filter(r => r.id !== idToDelete));
+  };
+
   return (
-    <div className="flex flex-col gap-6 max-h-[calc(100vh-120px)] overflow-hidden">
+    <div className="flex flex-col gap-6 lg:max-h-[calc(100vh-120px)] lg:overflow-hidden mb-10">
       <Breadcrumb items={["ADHI DASHBOARD", roleConfig.perspectiveLabel, "RULES ENGINE"]} />
       
       <div className="flex items-center justify-between shrink-0">
@@ -221,13 +241,18 @@ export default function RulesEngine() {
                     <td className="px-5 py-3.5 text-right whitespace-nowrap">
                       {editingId === rule.id ? (
                         <div className="flex items-center justify-end gap-1">
-                          <button onClick={saveEdit} className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg"><Save size={16}/></button>
-                          <button onClick={() => setEditingId(null)} className="p-1.5 text-gray-400 hover:bg-gray-100 rounded-lg"><X size={16}/></button>
+                          <button onClick={saveEdit} title="Save" className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg"><Save size={16}/></button>
+                          <button onClick={() => setEditingId(null)} title="Cancel" className="p-1.5 text-gray-400 hover:bg-gray-100 rounded-lg"><X size={16}/></button>
                         </div>
                       ) : (
-                        <button onClick={() => startEdit(rule)} className="p-1.5 text-gray-400 hover:text-adhi-primary hover:bg-adhi-surface rounded-lg transition-all opacity-0 group-hover:opacity-100">
-                          <Edit2 size={14} />
-                        </button>
+                        <div className="flex items-center justify-end gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                          <button onClick={() => startEdit(rule)} title="Edit Configuration" className="p-1.5 text-gray-400 hover:text-adhi-primary hover:bg-adhi-surface rounded-lg">
+                            <Edit2 size={14} />
+                          </button>
+                          <button onClick={() => deleteRule(rule.id)} title="Delete Rule" className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg">
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       )}
                     </td>
                   </tr>
@@ -238,7 +263,7 @@ export default function RulesEngine() {
         </div>
 
         {/* ── Core Shell Simulator Sidebar ── */}
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-6 lg:overflow-y-auto min-h-0 custom-scrollbar pr-1">
           <div className="bg-gray-900 rounded-2xl p-6 text-white shadow-xl shadow-gray-200">
             <div className="flex items-center gap-2 mb-6">
               <FlaskConical size={20} className="text-adhi-primary" />
@@ -257,7 +282,7 @@ export default function RulesEngine() {
                     className="w-full bg-gray-800 border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-adhi-primary text-white"
                   />
                   <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-adhi-primary font-bold bg-adhi-primary/10 px-2 py-1 rounded-md">
-                    {37.5 + (Number(simConfig.bedrooms || 0) * 15)} m² TOTAL
+                    {Math.max(15, 37.5 + ((Number(simConfig.bedrooms || 0) - 2) * 12.5))} m² TOTAL
                   </div>
                 </div>
               </div>
