@@ -25,7 +25,8 @@ public class HouseComponent {
     private String defaultRuleId; // e.g., RULE-001
 
     // Fixed quantity override (for Fixed-type components)
-    private Integer fixedQty;
+    @Column(precision = 10, scale = 2)
+    private java.math.BigDecimal fixedQty;
 
     private int sortOrder;
 }

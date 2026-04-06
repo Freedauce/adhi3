@@ -267,12 +267,12 @@ export default function RulesEngine() {
           <div className="bg-gray-900 rounded-2xl p-6 text-white shadow-xl shadow-gray-200">
             <div className="flex items-center gap-2 mb-6">
               <FlaskConical size={20} className="text-adhi-primary" />
-              <h3 className="text-lg font-bold">Core Shell Builder</h3>
+              <h3 className="text-lg font-bold">Core Shell BOQ Simulator</h3>
             </div>
             
             <div className="space-y-5">
               <div>
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1.5">Bedrooms (Expands Floor Area)</label>
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1.5">Bedrooms (Expands Floor Area & BOQ)</label>
                 <div className="relative">
                   <input 
                     type="number"
@@ -290,26 +290,57 @@ export default function RulesEngine() {
 
             <div className="mt-8 pt-6 border-t border-gray-800">
               <div className="flex items-center justify-between mb-4">
-                <span className="text-sm font-bold">Computed Core Shell Output</span>
-                <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-bold tracking-tight">LIVE</span>
+                <span className="text-sm font-bold">Live Computed BOQ</span>
+                <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-bold tracking-tight">LIVE USD</span>
               </div>
               
-              <div className="space-y-3">
-                {Object.keys(computedResults).map(compId => {
-                  const comp = components.find(c => c.id === compId);
-                  return (
-                    <div key={compId} className="flex items-center justify-between bg-gray-800/40 p-3 rounded-xl border border-gray-800 group hover:border-gray-700 transition-all">
-                      <div>
-                        <p className="text-[10px] font-bold text-gray-500 uppercase">{compId}</p>
-                        <p className="text-xs font-semibold text-gray-300">{comp?.name || compId}</p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-xl font-black text-adhi-primary leading-none">{computedResults[compId].final}</p>
-                        <p className="text-[10px] text-gray-500 font-bold">{comp?.unit || 'unit'}</p>
-                      </div>
-                    </div>
-                  );
-                })}
+              <div className="overflow-x-auto rounded-lg border border-gray-800 bg-gray-900/50">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-gray-800/80 text-[10px] font-bold text-gray-400 uppercase tracking-widest border-b border-gray-700">
+                    <tr>
+                      <th className="px-3 py-2 whitespace-nowrap">Code</th>
+                      <th className="px-3 py-2 whitespace-nowrap">Category</th>
+                      <th className="px-3 py-2 whitespace-nowrap min-w-[150px]">Description</th>
+                      <th className="px-3 py-2 whitespace-nowrap text-center">Unit</th>
+                      <th className="px-3 py-2 whitespace-nowrap text-right text-adhi-primary">Qty</th>
+                      <th className="px-3 py-2 whitespace-nowrap text-right">Rate (USD)</th>
+                      <th className="px-3 py-2 whitespace-nowrap text-right text-emerald-400">Amount (USD)</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-800/50">
+                    {Object.keys(computedResults).map(compId => {
+                      const comp = components.find(c => c.id === compId);
+                      const rate = comp?.rateUsd || 0;
+                      const qty = Number(computedResults[compId].final) || 0;
+                      const amount = qty * rate;
+
+                      return (
+                        <tr key={compId} className="hover:bg-gray-800/40 transition-colors">
+                          <td className="px-3 py-2.5 font-mono text-[10px] text-gray-300 whitespace-nowrap">{compId}</td>
+                          <td className="px-3 py-2.5 text-gray-400 whitespace-nowrap">{comp?.category}</td>
+                          <td className="px-3 py-2.5 font-medium text-gray-200">{comp?.name || compId}</td>
+                          <td className="px-3 py-2.5 text-center text-gray-500 font-bold uppercase">{comp?.unit}</td>
+                          <td className="px-3 py-2.5 text-right font-black text-adhi-primary text-sm">{qty}</td>
+                          <td className="px-3 py-2.5 text-right text-gray-300 font-mono tracking-tight">${rate.toFixed(2)}</td>
+                          <td className="px-3 py-2.5 text-right font-bold text-emerald-400">${amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="mt-4 pt-4 border-t-2 border-gray-700 flex flex-col justify-end gap-1">
+                <div className="flex items-end justify-between">
+                  <span className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">Grand Total</span>
+                  <span className="text-2xl font-black text-white">
+                    ${Object.keys(computedResults).reduce((sum, compId) => {
+                      const comp = components.find(c => c.id === compId);
+                      return sum + (Number(computedResults[compId].final) * (comp?.rateUsd || 0));
+                    }, 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
+                </div>
+                <p className="text-[10px] text-gray-500 text-right">Based on {Math.max(15, 37.5 + ((Number(simConfig.bedrooms || 0) - 2) * 12.5))} m² flow area.</p>
               </div>
             </div>
           </div>

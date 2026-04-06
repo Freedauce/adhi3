@@ -4,8 +4,6 @@ import { Badge } from "../../components/ui/Badge";
 import { useRole } from "../../context/RoleContext";
 import {
   components as initialComponents,
-  componentRegionPricing as initialPricing,
-  regions,
   houseTypes,
 } from "../../mock/houseTypes";
 import {
@@ -37,11 +35,8 @@ const blankForm = {
   type: "Fixed",
   unit: "set",
   description: "",
+  rateUsd: 0,
 };
-
-/* ── Blank pricing row per region ── */
-const blankPricing = () =>
-  Object.fromEntries(regions.filter(r => r.active).map(r => [r.code, { unitCost: 0, odooSku: "" }]));
 
 /* ══════════════════════════════════════════
    COMPONENT REGISTRY — Full CRUD
@@ -53,21 +48,8 @@ export default function ComponentRegistry() {
   const [comps, setComps] = useState(() =>
     initialComponents.map(c => ({ ...c }))
   );
-  const [pricing, setPricing] = useState(() => {
-    // Deep-clone pricing
-    const p = {};
-    Object.keys(initialPricing).forEach(region => {
-      p[region] = {};
-      Object.keys(initialPricing[region]).forEach(compId => {
-        p[region][compId] = { ...initialPricing[region][compId] };
-      });
-    });
-    return p;
-  });
-
   const [search, setSearch] = useState("");
   const [categoryFilter, setCategoryFilter] = useState("ALL");
-  const [selectedRegion, setSelectedRegion] = useState("RW");
   const [sortField, setSortField] = useState(null);
   const [sortDir, setSortDir] = useState("asc");
 
@@ -75,7 +57,6 @@ export default function ComponentRegistry() {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState({ ...blankForm });
-  const [formPricing, setFormPricing] = useState(blankPricing());
 
   // Detail drawer
   const [detailComp, setDetailComp] = useState(null);
@@ -135,10 +116,7 @@ export default function ComponentRegistry() {
       let va, vb;
       if (sortField === "name") { va = a.name; vb = b.name; }
       else if (sortField === "category") { va = a.category; vb = b.category; }
-      else if (sortField === "unitCost") {
-        va = pricing[selectedRegion]?.[a.id]?.unitCost || 0;
-        vb = pricing[selectedRegion]?.[b.id]?.unitCost || 0;
-      }
+      else if (sortField === "rateUsd") { va = a.rateUsd || 0; vb = b.rateUsd || 0; }
       else { va = a[sortField]; vb = b[sortField]; }
       if (typeof va === "string") {
         return sortDir === "asc" ? va.localeCompare(vb) : vb.localeCompare(va);
@@ -170,15 +148,8 @@ export default function ComponentRegistry() {
       type: comp.type,
       unit: comp.unit,
       description: comp.description,
+      rateUsd: comp.rateUsd || 0,
     });
-    // Build pricing for this comp across regions
-    const fp = {};
-    regions.filter(r => r.active).forEach(r => {
-      fp[r.code] = pricing[r.code]?.[comp.id]
-        ? { ...pricing[r.code][comp.id] }
-        : { unitCost: 0, odooSku: "" };
-    });
-    setFormPricing(fp);
     setShowForm(true);
   };
 
@@ -191,18 +162,6 @@ export default function ComponentRegistry() {
     if (editingId) {
       // Update component
       setComps(prev => prev.map(c => c.id === editingId ? { ...c, ...form } : c));
-      // Update pricing
-      setPricing(prev => {
-        const next = { ...prev };
-        Object.keys(formPricing).forEach(regionCode => {
-          if (!next[regionCode]) next[regionCode] = {};
-          next[regionCode] = {
-            ...next[regionCode],
-            [editingId]: { ...formPricing[regionCode] },
-          };
-        });
-        return next;
-      });
       // Update detail if open
       if (detailComp?.id === editingId) {
         setDetailComp(prev => ({ ...prev, ...form }));
@@ -212,14 +171,6 @@ export default function ComponentRegistry() {
       // Create component
       const newId = nextId();
       setComps(prev => [...prev, { id: newId, ...form }]);
-      setPricing(prev => {
-        const next = { ...prev };
-        Object.keys(formPricing).forEach(regionCode => {
-          if (!next[regionCode]) next[regionCode] = {};
-          next[regionCode][newId] = { ...formPricing[regionCode] };
-        });
-        return next;
-      });
       showToast(`${form.name} created successfully.`);
     }
     setShowForm(false);
@@ -228,19 +179,6 @@ export default function ComponentRegistry() {
   const handleDuplicate = (comp) => {
     const newId = nextId();
     setComps(prev => [...prev, { ...comp, id: newId, name: comp.name + " (Copy)" }]);
-    // Copy pricing
-    setPricing(prev => {
-      const next = { ...prev };
-      Object.keys(next).forEach(regionCode => {
-        if (next[regionCode][comp.id]) {
-          next[regionCode] = {
-            ...next[regionCode],
-            [newId]: { ...next[regionCode][comp.id] },
-          };
-        }
-      });
-      return next;
-    });
     showToast(`Duplicated as ${comp.name} (Copy).`);
   };
 
@@ -251,14 +189,6 @@ export default function ComponentRegistry() {
       return;
     }
     setComps(prev => prev.filter(c => c.id !== comp.id));
-    setPricing(prev => {
-      const next = { ...prev };
-      Object.keys(next).forEach(regionCode => {
-        const { [comp.id]: _, ...rest } = next[regionCode];
-        next[regionCode] = rest;
-      });
-      return next;
-    });
     if (detailComp?.id === comp.id) setDetailComp(null);
     showToast(`${comp.name} deleted.`, "error");
   };
@@ -362,19 +292,6 @@ export default function ComponentRegistry() {
           ))}
         </div>
 
-        {/* Region selector */}
-        <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-1.5">
-          <Globe size={14} className="text-gray-400" />
-          <select
-            value={selectedRegion}
-            onChange={(e) => setSelectedRegion(e.target.value)}
-            className="bg-transparent text-xs font-bold text-gray-600 focus:outline-none cursor-pointer"
-          >
-            {regions.filter(r => r.active).map(r => (
-              <option key={r.code} value={r.code}>{r.label} ({r.currency})</option>
-            ))}
-          </select>
-        </div>
       </div>
 
       {/* ── Table ── */}
@@ -397,15 +314,12 @@ export default function ComponentRegistry() {
               </th>
               <th className="px-5 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Type</th>
               <th className="px-5 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">Unit</th>
-              <th className="px-5 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest">
-                Odoo SKU ({selectedRegion})
-              </th>
               <th
                 className="px-5 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest text-right cursor-pointer select-none hover:text-gray-600"
-                onClick={() => handleSort("unitCost")}
+                onClick={() => handleSort("rateUsd")}
               >
                 <span className="flex items-center justify-end">
-                  Unit Cost ({selectedRegion}) <SortIcon field="unitCost" />
+                  Rate (USD) <SortIcon field="rateUsd" />
                 </span>
               </th>
               <th className="px-5 py-4 text-xs font-bold text-gray-400 uppercase tracking-widest text-right">Actions</th>
@@ -422,7 +336,6 @@ export default function ComponentRegistry() {
               </tr>
             )}
             {filteredComps.map(comp => {
-              const regionPricing = pricing[selectedRegion]?.[comp.id];
               const catStyle = categoryColors[comp.category] || { bg: "bg-gray-100 text-gray-600", icon: "📦" };
               const usedByCount = getUsedByKits(comp.id).length;
               return (
@@ -455,14 +368,8 @@ export default function ComponentRegistry() {
                     </span>
                   </td>
                   <td className="px-5 py-3.5 text-gray-500 text-xs font-medium">{comp.unit}</td>
-                  <td className="px-5 py-3.5 font-mono text-xs text-gray-600">
-                    {regionPricing?.odooSku || <span className="text-gray-300">—</span>}
-                  </td>
-                  <td className="px-5 py-3.5 text-right font-bold text-gray-900">
-                    {regionPricing
-                      ? `${regionPricing.unitCost.toLocaleString()} ${regionObj.currency}`
-                      : <span className="text-gray-300">—</span>
-                    }
+                  <td className="px-5 py-3.5 text-right font-bold text-emerald-600">
+                    ${(comp.rateUsd || 0).toFixed(2)}
                   </td>
                   <td className="px-5 py-3.5 text-right" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center justify-end gap-1.5">
@@ -569,48 +476,17 @@ export default function ComponentRegistry() {
                 </div>
               </div>
 
-              {/* ── Regional Pricing Table ── */}
+              {/* ── Component Pricing ── */}
               <div className="px-6 py-5 border-b border-gray-100">
                 <div className="flex items-center gap-2 mb-4">
-                  <Globe size={16} className="text-adhi-primary" />
-                  <h4 className="font-bold text-gray-900">Regional Pricing & SKU</h4>
+                  <DollarSign size={16} className="text-adhi-primary" />
+                  <h4 className="font-bold text-gray-900">Component Rate (USD)</h4>
                 </div>
-                <div className="bg-gray-50 rounded-xl overflow-hidden border border-gray-100">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="text-[11px] font-bold text-gray-400 uppercase tracking-widest">
-                        <th className="px-4 py-3 text-left">Region</th>
-                        <th className="px-4 py-3 text-left">Odoo SKU</th>
-                        <th className="px-4 py-3 text-right">Unit Cost</th>
-                        <th className="px-4 py-3 text-right">USD Equiv.</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {regions.filter(r => r.active).map(region => {
-                        const p = pricing[region.code]?.[detailComp.id];
-                        const usdEquiv = p ? Math.round(p.unitCost / region.fxRateToUsd) : 0;
-                        return (
-                          <tr key={region.code} className="border-t border-gray-100 hover:bg-white transition-colors">
-                            <td className="px-4 py-3">
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm">{region.code === "RW" ? "🇷🇼" : region.code === "KE" ? "🇰🇪" : region.code === "TZ" ? "🇹🇿" : region.code === "UG" ? "🇺🇬" : "🌍"}</span>
-                                <span className="font-medium text-gray-800">{region.label}</span>
-                              </div>
-                            </td>
-                            <td className="px-4 py-3 font-mono text-xs text-gray-600">
-                              {p?.odooSku || <span className="text-gray-300">—</span>}
-                            </td>
-                            <td className="px-4 py-3 text-right font-bold text-gray-900">
-                              {p ? `${p.unitCost.toLocaleString()} ${region.currency}` : "—"}
-                            </td>
-                            <td className="px-4 py-3 text-right text-gray-500 text-xs">
-                              {p ? `≈ $${usdEquiv.toLocaleString()}` : "—"}
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                <div className="bg-gray-50 rounded-xl p-4 border border-gray-100 flex items-center justify-between">
+                  <span className="text-sm text-gray-600 font-medium">Standard Rate</span>
+                  <span className="text-xl font-black text-emerald-600">
+                    ${(detailComp.rateUsd || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                  </span>
                 </div>
               </div>
 
@@ -756,63 +632,23 @@ export default function ComponentRegistry() {
                   />
                 </div>
 
-                {/* ── Regional Pricing ── */}
+                {/* ── Rate Pricing ── */}
                 <div>
                   <div className="flex items-center gap-2 mb-3">
-                    <Globe size={15} className="text-adhi-primary" />
+                    <DollarSign size={15} className="text-adhi-primary" />
                     <label className="text-xs font-bold text-gray-500 uppercase tracking-wider">
-                      Regional Pricing & Odoo SKU
+                      Rate (USD)
                     </label>
                   </div>
-                  <div className="bg-gray-50 rounded-xl border border-gray-100 overflow-hidden">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="text-[10px] font-bold text-gray-400 uppercase tracking-widest bg-gray-100/60">
-                          <th className="px-4 py-2.5 text-left">Region</th>
-                          <th className="px-4 py-2.5 text-left">Odoo SKU</th>
-                          <th className="px-4 py-2.5 text-right">Unit Cost (Local)</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {regions.filter(r => r.active).map(region => (
-                          <tr key={region.code} className="border-t border-gray-100">
-                            <td className="px-4 py-3">
-                              <div className="flex items-center gap-2">
-                                <span className="text-sm">{region.code === "RW" ? "🇷🇼" : region.code === "KE" ? "🇰🇪" : region.code === "TZ" ? "🇹🇿" : region.code === "UG" ? "🇺🇬" : "🌍"}</span>
-                                <span className="font-medium text-gray-700 text-xs">{region.label}</span>
-                                <span className="text-[10px] text-gray-400">{region.currency}</span>
-                              </div>
-                            </td>
-                            <td className="px-4 py-3">
-                              <input
-                                type="text"
-                                placeholder="e.g. FND-STRIP-RW"
-                                value={formPricing[region.code]?.odooSku || ""}
-                                onChange={(e) => setFormPricing(prev => ({
-                                  ...prev,
-                                  [region.code]: { ...prev[region.code], odooSku: e.target.value.toUpperCase() },
-                                }))}
-                                className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-mono bg-white focus:outline-none focus:ring-1 focus:ring-adhi-primary/20 focus:border-adhi-primary transition-all"
-                              />
-                            </td>
-                            <td className="px-4 py-3">
-                              <input
-                                type="number"
-                                min="0"
-                                placeholder="0"
-                                value={formPricing[region.code]?.unitCost || ""}
-                                onChange={(e) => setFormPricing(prev => ({
-                                  ...prev,
-                                  [region.code]: { ...prev[region.code], unitCost: parseInt(e.target.value) || 0 },
-                                }))}
-                                className="w-full px-3 py-1.5 rounded-lg border border-gray-200 text-xs text-right bg-white focus:outline-none focus:ring-1 focus:ring-adhi-primary/20 focus:border-adhi-primary transition-all"
-                              />
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  <input
+                    type="number"
+                    min="0"
+                    step="0.01"
+                    placeholder="Enter rate in USD..."
+                    value={form.rateUsd}
+                    onChange={(e) => setForm(prev => ({ ...prev, rateUsd: parseFloat(e.target.value) || 0 }))}
+                    className="w-full px-4 py-2.5 rounded-xl border border-gray-200 text-sm focus:outline-none focus:ring-2 focus:ring-adhi-primary/20 focus:border-adhi-primary transition-all font-mono"
+                  />
                 </div>
               </div>
 

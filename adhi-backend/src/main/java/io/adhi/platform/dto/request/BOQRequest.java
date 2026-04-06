@@ -10,6 +10,7 @@ public class BOQRequest {
     private int bedrooms;
     private int bathrooms;
     private int floorAreaM2;
+    private int unitCount = 1; // Default to 1
     @NotBlank private String roofType;
     @NotBlank private String finishingGrade;
 }

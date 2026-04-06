@@ -92,6 +92,7 @@ public class BOQService {
         Region region = regionRepo.findByCode(req.getRegionCode())
                 .orElseThrow(() -> new RuntimeException("Region not found: " + req.getRegionCode()));
 
+        int unitCount = req.getUnitCount() > 0 ? req.getUnitCount() : 1;
         int bedrooms = req.getBedrooms() > 0 ? req.getBedrooms() : house.getDefaultBedrooms();
         int bathrooms = req.getBathrooms() > 0 ? req.getBathrooms() : house.getDefaultBathrooms();
         int floorAreaM2 = req.getFloorAreaM2() > 0 ? req.getFloorAreaM2() : house.getDefaultFloorAreaM2();
@@ -108,6 +109,7 @@ public class BOQService {
                 .user(user)
                 .regionCode(region.getCode())
                 .currency(region.getCurrency())
+                .unitCount(unitCount)
                 .configBedrooms(bedrooms)
                 .configBathrooms(bathrooms)
                 .configFloorAreaM2(floorAreaM2)
@@ -123,9 +125,11 @@ public class BOQService {
             HouseComponent hc = houseComponents.get(i);
             Component comp = hc.getComponent();
 
-            // Calculate quantity via Rules Engine
-            int qty = rulesEngine.calculateQuantity(hc, bedrooms, bathrooms, floorAreaM2,
-                    req.getRoofType(), req.getFinishingGrade());
+            // Calculate base single unit quantity via Rules Engine
+            BigDecimal baseQty = rulesEngine.calculateQuantity(hc);
+
+            // Multiply by requested unit count
+            BigDecimal qty = baseQty.multiply(BigDecimal.valueOf(unitCount));
 
             // Lookup regional pricing
             ComponentRegionPrice pricing = priceRepo
@@ -139,7 +143,7 @@ public class BOQService {
                 unitCost = unitCost.multiply(finishingMultiplier).setScale(2, RoundingMode.HALF_UP);
             }
 
-            BigDecimal totalCost = unitCost.multiply(BigDecimal.valueOf(qty));
+            BigDecimal totalCost = unitCost.multiply(qty);
 
             BOQLineItem lineItem = BOQLineItem.builder()
                     .boq(boq)

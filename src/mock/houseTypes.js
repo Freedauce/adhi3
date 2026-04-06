@@ -69,26 +69,26 @@ export const houseTypes = [
 // Master component registry
 // Master component library — Synced with v1.2 specifications
 export const components = [
-  { id: "FND-SET-001", name: "Setting out", category: "Foundation", type: "Fixed", unit: "item", description: "Setting out" },
-  { id: "FND-EXC-001", name: "Excavation for strip footing", category: "Foundation", type: "Variable", unit: "m3", description: "Excavation for strip footing" },
-  { id: "FND-HCF-001", name: "Hardcore fill 200 mm", category: "Foundation", type: "Variable", unit: "m3", description: "Hardcore fill 200 mm" },
-  { id: "FND-SND-001", name: "Sand blinding 50 mm", category: "Foundation", type: "Variable", unit: "m3", description: "Sand blinding 50 mm" },
-  { id: "FND-BLN-001", name: "Concrete blinding 40 mm", category: "Foundation", type: "Variable", unit: "m3", description: "Concrete blinding 40 mm" },
-  { id: "FND-STR-001", name: "Strip footing concrete", category: "Foundation", type: "Variable", unit: "m3", description: "Strip footing concrete" },
-  { id: "FND-DPM-001", name: "Damp proof membrane", category: "Foundation", type: "Variable", unit: "m2", description: "Damp proof membrane" },
-  { id: "FND-SLB-001", name: "Reinforced slab concrete 100 mm", category: "Foundation", type: "Variable", unit: "m3", description: "Reinforced slab concrete 100 mm" },
-  { id: "FND-MSH-001", name: "Slab reinforcement mesh", category: "Foundation", type: "Variable", unit: "m2", description: "Slab reinforcement mesh" },
-  { id: "WAL-EXT-001", name: "External wall system", category: "Walls", type: "Variable", unit: "m2", description: "External wall system" },
-  { id: "STR-RBM-001", name: "Ring beam", category: "Structure", type: "Variable", unit: "m", description: "Ring beam" },
-  { id: "ROF-FRM-001", name: "Roof structure", category: "Roof", type: "Variable", unit: "m2", description: "Roof structure" },
-  { id: "ROF-COV-001", name: "Roof covering", category: "Roof", type: "Variable", unit: "m2", description: "Roof covering" },
-  { id: "ROF-RDG-001", name: "Ridge cap", category: "Roof", type: "Variable", unit: "m", description: "Ridge cap" },
-  { id: "ROF-FAS-001", name: "Fascia board", category: "Roof", type: "Variable", unit: "m", description: "Fascia board" },
-  { id: "ROF-GTR-001", name: "Gutters", category: "Roof", type: "Variable", unit: "m", description: "Gutters" },
-  { id: "ROF-DWP-001", name: "Downpipes", category: "Roof", type: "Variable", unit: "nr", description: "Downpipes" },
-  { id: "OPN-DRF-001", name: "External door frame provision", category: "Openings", type: "Variable", unit: "nr", description: "External door frame provision" },
-  { id: "OPN-WOP-001", name: "Window opening provisions", category: "Openings", type: "Variable", unit: "nr", description: "Window opening provisions" },
-  { id: "OPN-LNT-001", name: "Lintels to openings", category: "Openings", type: "Variable", unit: "m", description: "Lintels to openings" }
+  { id: "FND-SET-001", name: "Setting out", category: "Foundation", type: "Fixed", unit: "item", description: "Setting out", rateUsd: 150 },
+  { id: "FND-EXC-001", name: "Excavation for strip footing", category: "Foundation", type: "Variable", unit: "m3", description: "Excavation for strip footing", rateUsd: 12 },
+  { id: "FND-HCF-001", name: "Hardcore fill 200 mm", category: "Foundation", type: "Variable", unit: "m3", description: "Hardcore fill 200 mm", rateUsd: 28 },
+  { id: "FND-SND-001", name: "Sand blinding 50 mm", category: "Foundation", type: "Variable", unit: "m3", description: "Sand blinding 50 mm", rateUsd: 22 },
+  { id: "FND-BLN-001", name: "Concrete blinding 40 mm", category: "Foundation", type: "Variable", unit: "m3", description: "Concrete blinding 40 mm", rateUsd: 115 },
+  { id: "FND-STR-001", name: "Strip footing concrete", category: "Foundation", type: "Variable", unit: "m3", description: "Strip footing concrete", rateUsd: 135 },
+  { id: "FND-DPM-001", name: "Damp proof membrane", category: "Foundation", type: "Variable", unit: "m2", description: "Damp proof membrane", rateUsd: 3.5 },
+  { id: "FND-SLB-001", name: "Reinforced slab concrete 100 mm", category: "Foundation", type: "Variable", unit: "m3", description: "Reinforced slab concrete 100 mm", rateUsd: 145 },
+  { id: "FND-MSH-001", name: "Slab reinforcement mesh", category: "Foundation", type: "Variable", unit: "m2", description: "Slab reinforcement mesh", rateUsd: 8 },
+  { id: "WAL-EXT-001", name: "External wall system", category: "Walls", type: "Variable", unit: "m2", description: "External wall system", rateUsd: 45 },
+  { id: "STR-RBM-001", name: "Ring beam", category: "Structure", type: "Variable", unit: "m", description: "Ring beam", rateUsd: 18 },
+  { id: "ROF-FRM-001", name: "Roof structure", category: "Roof", type: "Variable", unit: "m2", description: "Roof structure", rateUsd: 22 },
+  { id: "ROF-COV-001", name: "Roof covering", category: "Roof", type: "Variable", unit: "m2", description: "Roof covering", rateUsd: 14 },
+  { id: "ROF-RDG-001", name: "Ridge cap", category: "Roof", type: "Variable", unit: "m", description: "Ridge cap", rateUsd: 7 },
+  { id: "ROF-FAS-001", name: "Fascia board", category: "Roof", type: "Variable", unit: "m", description: "Fascia board", rateUsd: 6 },
+  { id: "ROF-GTR-001", name: "Gutters", category: "Roof", type: "Variable", unit: "m", description: "Gutters", rateUsd: 9 },
+  { id: "ROF-DWP-001", name: "Downpipes", category: "Roof", type: "Variable", unit: "nr", description: "Downpipes", rateUsd: 25 },
+  { id: "OPN-DRF-001", name: "External door frame provision", category: "Openings", type: "Variable", unit: "nr", description: "External door frame provision", rateUsd: 80 },
+  { id: "OPN-WOP-001", name: "Window opening provisions", category: "Openings", type: "Variable", unit: "nr", description: "Window opening provisions", rateUsd: 25 },
+  { id: "OPN-LNT-001", name: "Lintels to openings", category: "Openings", type: "Variable", unit: "m", description: "Lintels to openings", rateUsd: 15 }
 ];
 
 

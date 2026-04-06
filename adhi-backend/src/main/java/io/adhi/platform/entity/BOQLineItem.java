@@ -24,7 +24,8 @@ public class BOQLineItem {
 
     private String rulesApplied; // comma-separated rule codes
 
-    private int qty;
+    @Column(precision = 10, scale = 2, nullable = false)
+    private BigDecimal qty;
     private String unit;
 
     @Column(precision = 14, scale = 2)

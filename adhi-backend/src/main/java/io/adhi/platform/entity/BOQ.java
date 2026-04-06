@@ -36,6 +36,7 @@ public class BOQ {
     private int configBedrooms;
     private int configBathrooms;
     private int configFloorAreaM2;
+    private int unitCount;
     private String configRoofType;
     private String configFinishingGrade;
 

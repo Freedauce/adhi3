@@ -24,7 +24,7 @@ public class HouseTypeRequest {
     public static class HouseComponentLink {
         @NotBlank private String compCode;
         private String defaultRuleId;
-        private Integer fixedQty;
+        private java.math.BigDecimal fixedQty;
         private int sortOrder;
     }
 }
