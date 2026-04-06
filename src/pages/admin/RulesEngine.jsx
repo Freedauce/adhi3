@@ -11,11 +11,9 @@ import { houseTypes, components } from "../../mock/houseTypes";
 
 /* ── Default Rules — Functional ── */
 const initialRules = [
-  { id: "RULE-001", layer: "BASE", trigger: "house_type", formula: "bedrooms === 0 ? 12 : bedrooms === 1 ? 16 : 24", output: "COMP-002", status: "PUBLISHED", version: 3 },
-  { id: "RULE-002", layer: "ADJUSTMENT", trigger: "floor_area", formula: "Math.ceil((Math.sqrt(floorArea) * 4) / 0.6)", output: "COMP-002", status: "PUBLISHED", version: 2 },
-  { id: "RULE-002b", layer: "GUARD", trigger: "always", formula: "Math.max(base, adjustment)", output: "COMP-002", status: "PUBLISHED", version: 1 },
-  { id: "RULE-003", layer: "BASE", trigger: "always", formula: "Math.ceil(floorArea / 10)", output: "COMP-003", status: "PUBLISHED", version: 2 },
-  { id: "RULE-004", layer: "BASE", trigger: "bedrooms", formula: "bedrooms + 2", output: "COMP-004", status: "PUBLISHED", version: 1 },
+  { id: "RULE-CS1", layer: "BASE", trigger: "always", formula: "1", output: "COMP-001", status: "PUBLISHED", version: 1 },
+  { id: "RULE-CS2", layer: "BASE", trigger: "floor_area", formula: "Math.ceil((Math.sqrt(floorArea) * 4) / 0.6)", output: "COMP-002", status: "PUBLISHED", version: 1 },
+  { id: "RULE-CS3", layer: "BASE", trigger: "floor_area", formula: "Math.ceil(floorArea / 10)", output: "COMP-003", status: "PUBLISHED", version: 1 },
 ];
 
 const layerColors = { 
@@ -33,17 +31,15 @@ export default function RulesEngine() {
 
   // Simulator State
   const [simConfig, setSimConfig] = useState({
-    houseType: houseTypes[0].id,
-    floorArea: houseTypes[0].defaultFloorAreaM2,
-    bedrooms: houseTypes[0].defaultBedrooms,
+    bedrooms: 0,
   });
 
   /* ── Formula Execution Hub ── */
-  const runRules = useMemo(() => {
+  const { computedResults, conflicts } = useMemo(() => {
     const results = {};
+    const conflictList = [];
     const context = {
-      houseType: simConfig.houseType,
-      floorArea: Number(simConfig.floorArea),
+      floorArea: 37.5 + (Number(simConfig.bedrooms) * 15),
       bedrooms: Number(simConfig.bedrooms),
     };
 
@@ -55,26 +51,34 @@ export default function RulesEngine() {
 
     sortedRules.forEach(rule => {
       try {
+        if (!results[rule.output]) {
+          results[rule.output] = { final: 0, steps: [], base: 0, adjustment: 0 };
+        }
+        
+        // Conflict detection: No two rules should overwrite the same field at the same level
+        if (results[rule.output].steps.some(s => s.layer === rule.layer) && rule.layer !== "GUARD") {
+           conflictList.push(`Conflict: Multiple ${rule.layer} rules target ${rule.output}`);
+        }
+
         // Simple evaluator using Function constructor (scoped context)
-        const fn = new Function("bedrooms", "floorArea", "houseType", "base", "adjustment", `return ${rule.formula}`);
-        const base = results[rule.output]?.base || 0;
-        const adjustment = results[rule.output]?.adjustment || 0;
+        const fn = new Function("bedrooms", "floorArea", "base", "adjustment", `return ${rule.formula}`);
+        const base = results[rule.output].base || 0;
+        const adjustment = results[rule.output].adjustment || 0;
         
-        const value = fn(context.bedrooms, context.floorArea, context.houseType, base, adjustment);
-        
-        if (!results[rule.output]) results[rule.output] = { final: 0, steps: [] };
+        const value = fn(context.bedrooms, context.floorArea, base, adjustment);
         
         if (rule.layer === "BASE") results[rule.output].base = value;
         if (rule.layer === "ADJUSTMENT") results[rule.output].adjustment = value;
         
         results[rule.output].final = value;
-        results[rule.output].steps.push({ ruleId: rule.id, value });
+        results[rule.output].steps.push({ ruleId: rule.id, layer: rule.layer, value });
       } catch (e) {
         console.error(`Error in rule ${rule.id}:`, e);
+        conflictList.push(`Error computing ${rule.id}: ${e.message}`);
       }
     });
 
-    return results;
+    return { computedResults: results, conflicts: conflictList };
   }, [rules, simConfig]);
 
   /* ── Handlers ── */
@@ -131,27 +135,38 @@ export default function RulesEngine() {
           </div>
           
           <div className="flex-1 overflow-auto">
-            <table className="w-full text-left text-sm border-collapse">
+            <table className="w-full text-left text-sm border-collapse min-w-[900px]">
               <thead className="sticky top-0 bg-white z-10 shadow-sm">
                 <tr className="bg-white border-b border-gray-100">
-                  <th className="px-5 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Rule ID</th>
-                  <th className="px-5 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Layer</th>
-                  <th className="px-5 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Trigger</th>
-                  <th className="px-5 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Formula</th>
-                  <th className="px-5 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest">Output</th>
-                  <th className="px-5 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest text-right">Actions</th>
+                  <th className="px-5 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Rule ID</th>
+                  <th className="px-5 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Layer</th>
+                  <th className="px-5 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Trigger</th>
+                  <th className="px-5 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Formula</th>
+                  <th className="px-5 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest whitespace-nowrap">Output</th>
+                  <th className="px-5 py-4 text-[11px] font-bold text-gray-400 uppercase tracking-widest text-right whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-50">
                 {rules.map(rule => (
                   <tr key={rule.id} className={`group hover:bg-adhi-light/30 transition-colors ${editingId === rule.id ? 'bg-adhi-light/20' : ''}`}>
-                    <td className="px-5 py-3.5 font-bold text-gray-900">{rule.id}</td>
-                    <td className="px-5 py-3.5">
+                    <td className="px-5 py-3.5 font-bold text-gray-900 whitespace-nowrap">
+                      {editingId === rule.id ? (
+                        <input 
+                          type="text" 
+                          value={editForm.id}
+                          onChange={e => setEditForm({...editForm, id: e.target.value})}
+                          className="text-xs border border-gray-300 rounded p-1.5 w-24 bg-white text-gray-900 focus:ring-2 focus:ring-adhi-primary outline-none"
+                        />
+                      ) : (
+                        rule.id
+                      )}
+                    </td>
+                    <td className="px-5 py-3.5 whitespace-nowrap">
                       {editingId === rule.id ? (
                         <select 
                           value={editForm.layer}
                           onChange={e => setEditForm({...editForm, layer: e.target.value})}
-                          className="text-xs border border-gray-200 rounded p-1 focus:ring-1 focus:ring-adhi-primary"
+                          className="text-xs border border-gray-300 rounded p-1.5 focus:ring-2 focus:ring-adhi-primary outline-none"
                         >
                           <option>BASE</option>
                           <option>ADJUSTMENT</option>
@@ -164,38 +179,38 @@ export default function RulesEngine() {
                         </span>
                       )}
                     </td>
-                    <td className="px-5 py-3.5">
+                    <td className="px-5 py-3.5 whitespace-nowrap">
                       {editingId === rule.id ? (
                         <input 
                           type="text" 
                           value={editForm.trigger}
                           onChange={e => setEditForm({...editForm, trigger: e.target.value})}
-                          className="text-xs border border-gray-200 rounded p-1 w-full font-mono bg-white"
+                          className="text-xs border border-gray-300 rounded p-1.5 w-32 font-mono bg-white outline-none focus:ring-2 focus:ring-adhi-primary"
                         />
                       ) : (
                         <span className="text-gray-500 font-mono text-xs">{rule.trigger}</span>
                       )}
                     </td>
-                    <td className="px-5 py-3.5">
+                    <td className="px-5 py-3.5 min-w-[250px]">
                       {editingId === rule.id ? (
                         <input 
                           type="text" 
                           value={editForm.formula}
                           onChange={e => setEditForm({...editForm, formula: e.target.value})}
-                          className="text-xs border border-gray-200 rounded p-1 w-full font-mono bg-white"
+                          className="text-xs border border-gray-300 rounded p-1.5 w-full font-mono bg-white outline-none focus:ring-2 focus:ring-adhi-primary"
                         />
                       ) : (
-                        <span className="text-gray-700 text-xs font-medium px-2 py-1 bg-gray-50 rounded italic border border-gray-100">
+                        <span className="text-gray-700 text-xs font-medium px-2 py-1 bg-gray-50 rounded italic border border-gray-100 break-words whitespace-normal block">
                           {rule.formula}
                         </span>
                       )}
                     </td>
-                    <td className="px-5 py-3.5">
+                    <td className="px-5 py-3.5 whitespace-nowrap">
                       {editingId === rule.id ? (
                         <select 
                           value={editForm.output}
                           onChange={e => setEditForm({...editForm, output: e.target.value})}
-                          className="text-xs border border-gray-200 rounded p-1 focus:ring-1 focus:ring-adhi-primary"
+                          className="text-xs border border-gray-300 rounded p-1.5 focus:ring-2 focus:ring-adhi-primary outline-none max-w-[150px]"
                         >
                           {components.map(c => <option key={c.id} value={c.id}>{c.id}</option>)}
                         </select>
@@ -203,7 +218,7 @@ export default function RulesEngine() {
                         <span className="font-mono text-xs text-adhi-primary font-bold">{rule.output}</span>
                       )}
                     </td>
-                    <td className="px-5 py-3.5 text-right">
+                    <td className="px-5 py-3.5 text-right whitespace-nowrap">
                       {editingId === rule.id ? (
                         <div className="flex items-center justify-end gap-1">
                           <button onClick={saveEdit} className="p-1.5 text-emerald-600 hover:bg-emerald-50 rounded-lg"><Save size={16}/></button>
@@ -222,85 +237,54 @@ export default function RulesEngine() {
           </div>
         </div>
 
-        {/* ── Simulator Sidebar ── */}
+        {/* ── Core Shell Simulator Sidebar ── */}
         <div className="flex flex-col gap-6">
           <div className="bg-gray-900 rounded-2xl p-6 text-white shadow-xl shadow-gray-200">
             <div className="flex items-center gap-2 mb-6">
               <FlaskConical size={20} className="text-adhi-primary" />
-              <h3 className="text-lg font-bold">Rule Simulator</h3>
+              <h3 className="text-lg font-bold">Core Shell Builder</h3>
             </div>
             
             <div className="space-y-5">
               <div>
-                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1.5">House Model</label>
-                <select 
-                  value={simConfig.houseType}
-                  onChange={e => {
-                    const ht = houseTypes.find(h => h.id === e.target.value);
-                    setSimConfig({...simConfig, houseType: e.target.value, floorArea: ht.defaultFloorAreaM2, bedrooms: ht.defaultBedrooms});
-                  }}
-                  className="w-full bg-gray-800 border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-adhi-primary"
-                >
-                  {houseTypes.map(h => <option key={h.id} value={h.id}>{h.name}</option>)}
-                </select>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1.5">Floor Area (m²)</label>
+                <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1.5">Bedrooms (Expands Floor Area)</label>
+                <div className="relative">
                   <input 
                     type="number"
-                    value={simConfig.floorArea}
-                    onChange={e => setSimConfig({...simConfig, floorArea: e.target.value})}
-                    className="w-full bg-gray-800 border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-adhi-primary"
-                  />
-                </div>
-                <div>
-                  <label className="text-[10px] font-bold text-gray-400 uppercase tracking-widest block mb-1.5">Bedrooms</label>
-                  <input 
-                    type="number"
+                    min="0"
                     value={simConfig.bedrooms}
                     onChange={e => setSimConfig({...simConfig, bedrooms: e.target.value})}
-                    className="w-full bg-gray-800 border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-adhi-primary"
+                    className="w-full bg-gray-800 border-none rounded-xl px-4 py-2.5 text-sm focus:ring-2 focus:ring-adhi-primary text-white"
                   />
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-adhi-primary font-bold bg-adhi-primary/10 px-2 py-1 rounded-md">
+                    {37.5 + (Number(simConfig.bedrooms || 0) * 15)} m² TOTAL
+                  </div>
                 </div>
               </div>
             </div>
 
             <div className="mt-8 pt-6 border-t border-gray-800">
               <div className="flex items-center justify-between mb-4">
-                <span className="text-sm font-bold">Computed BOQ Result</span>
+                <span className="text-sm font-bold">Computed Core Shell Output</span>
                 <span className="text-[10px] bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded-full font-bold tracking-tight">LIVE</span>
               </div>
               
               <div className="space-y-3">
-                {Object.keys(runRules).map(compId => {
+                {Object.keys(computedResults).map(compId => {
                   const comp = components.find(c => c.id === compId);
                   return (
                     <div key={compId} className="flex items-center justify-between bg-gray-800/40 p-3 rounded-xl border border-gray-800 group hover:border-gray-700 transition-all">
                       <div>
                         <p className="text-[10px] font-bold text-gray-500 uppercase">{compId}</p>
-                        <p className="text-xs font-semibold text-gray-300">{comp?.name}</p>
+                        <p className="text-xs font-semibold text-gray-300">{comp?.name || compId}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-xl font-black text-adhi-primary leading-none">{runRules[compId].final}</p>
-                        <p className="text-[10px] text-gray-500 font-bold">{comp?.unit}</p>
+                        <p className="text-xl font-black text-adhi-primary leading-none">{computedResults[compId].final}</p>
+                        <p className="text-[10px] text-gray-500 font-bold">{comp?.unit || 'unit'}</p>
                       </div>
                     </div>
                   );
                 })}
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-adhi-surface border border-adhi-primary/10 rounded-2xl p-5">
-            <div className="flex gap-3">
-              <Info size={18} className="text-adhi-primary shrink-0" />
-              <div>
-                <p className="text-xs font-bold text-adhi-dark mb-1">Validation Status</p>
-                <div className="flex items-center gap-1.5 text-[11px] text-emerald-600 font-semibold">
-                  <CheckCircle2 size={12} /> No conflicts detected in sequence
-                </div>
               </div>
             </div>
           </div>
