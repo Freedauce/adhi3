@@ -78,7 +78,7 @@ export default function ComponentRegistry() {
     return `COMP-${String(max + 1).padStart(3, "0")}`;
   };
 
-  const getRegionObj = (code) => regions.find(r => r.code === code) || regions[0];
+
 
   /* ── Which house kits use a component? ── */
   const getUsedByKits = (compId) =>
@@ -136,7 +136,6 @@ export default function ComponentRegistry() {
   const openCreateForm = () => {
     setEditingId(null);
     setForm({ ...blankForm });
-    setFormPricing(blankPricing());
     setShowForm(true);
   };
 
@@ -193,8 +192,7 @@ export default function ComponentRegistry() {
     showToast(`${comp.name} deleted.`, "error");
   };
 
-  /* ── Region info ── */
-  const regionObj = getRegionObj(selectedRegion);
+
 
   /* ══════════════════════════════════════
      RENDER
