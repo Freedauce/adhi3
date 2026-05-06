@@ -45,6 +45,8 @@ import ComplianceReview from "./pages/government/ComplianceReview";
 // Franchisee Routes
 import FranchiseeOverview from "./pages/franchisee/FranchiseeOverview";
 import HouseCatalog from "./pages/franchisee/HouseCatalog";
+import OrderBOQ from "./pages/franchisee/OrderBOQ";
+import PaymentUpload from "./pages/franchisee/PaymentUpload";
 import MyOrders from "./pages/franchisee/MyOrders";
 import FranchiseeProcurement from "./pages/franchisee/FranchiseeProcurement";
 import FranchiseeAcademy from "./pages/franchisee/FranchiseeAcademy";
@@ -104,6 +106,8 @@ function App() {
             {/* Franchisee */}
             <Route path="/franchisee/overview" element={<FranchiseeOverview />} />
             <Route path="/franchisee/catalog" element={<HouseCatalog />} />
+            <Route path="/franchisee/order-boq" element={<OrderBOQ />} />
+            <Route path="/franchisee/payment" element={<PaymentUpload />} />
             <Route path="/franchisee/orders" element={<MyOrders />} />
             <Route path="/franchisee/procurement" element={<FranchiseeProcurement />} />
             <Route path="/franchisee/academy" element={<FranchiseeAcademy />} />
