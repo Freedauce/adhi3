@@ -12,11 +12,6 @@ import {
 
 /* ── Sample gallery images per house type for demo ── */
 const defaultGallery = {
-  "HT-001": [
-    "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=600&h=400&fit=crop",
-    "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?w=600&h=400&fit=crop",
-    "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=600&h=400&fit=crop",
-  ],
   "HT-002": [
     "https://images.unsplash.com/photo-1512917774080-9991f1c4c750?w=600&h=400&fit=crop",
     "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=600&h=400&fit=crop",
