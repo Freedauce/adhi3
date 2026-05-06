@@ -12,7 +12,7 @@ export const houseTypes = [
     assemblyWeeks: 1,
     assemblyText: "10 days",
     status: "ACTIVE",
-    imageUrl: "https://images.unsplash.com/photo-1518780664697-55e3ad937233?w=600&h=400&fit=crop",
+    imageUrl: "/presentation-kit.jpeg",
     tag: "Standard",
     components: ["COMP-001","COMP-002","COMP-003","COMP-005","COMP-006","COMP-007","COMP-010"],
     configurableInputs: ["INP-003","INP-004","INP-006"],
