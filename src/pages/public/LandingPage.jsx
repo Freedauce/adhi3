@@ -187,7 +187,7 @@ export default function LandingPage() {
                                             </p>
                                         </div>
                                         <span className="text-[12px] text-gray-400 font-medium bg-gray-100 px-2.5 py-1 rounded-lg">
-                                            {house.assemblyWeeks} wk build
+                                            {house.assemblyText || `${house.assemblyWeeks} wk build`}
                                         </span>
                                     </div>
                                 </div>
